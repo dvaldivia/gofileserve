@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gofileserve
+spec:
+  selector:
+    matchLabels:
+      app: gofileserve
+  template:
+    metadata:
+      labels:
+        app: gofileserve
+    spec:
+      containers:
+        - image: miniodev/gofileserve
+          imagePullPolicy: Always
+          name: gofileserve
+          ports:
+            - name: http
+              containerPort: 4000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gofileserve
+spec:
+  ports:
+    - name: http
+      port: 4000
+  selector:
+    app: gofileserve
