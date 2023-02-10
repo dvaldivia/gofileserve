@@ -1,10 +1,15 @@
 package main
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 )
+
+//go:embed static/*
+var assets embed.FS
 
 func serveFiles(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Request Headers")
@@ -13,8 +18,13 @@ func serveFiles(w http.ResponseWriter, req *http.Request) {
 			fmt.Printf("%v: %v\n", name, h)
 		}
 	}
-	fs := http.FileServer(http.Dir("./static"))
-	fs.ServeHTTP(w, req)
+	buildFs, err := fs.Sub(assets, "static")
+	if err != nil {
+		panic(err)
+	}
+
+	fsH := http.FileServer(http.FS(buildFs))
+	fsH.ServeHTTP(w, req)
 }
 
 func main() {
